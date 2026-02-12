@@ -33,10 +33,6 @@ app.use(
 app.use(express.json());
 
 // ================= STATIC FILES =================
-app.use(
-  "/uploads",
-  express.static(path.join(__dirname, "uploads"))
-);
 
 // ================= ROUTES =================
 app.use("/api/auth", authRoutes);

@@ -1,10 +1,6 @@
 import Service from "../models/Service.js";
 
-/* =========================================================
-   CREATE SERVICE
-   POST /api/services
-   Admin
-========================================================= */
+/* ================= CREATE SERVICE ================= */
 export const createService = async (req, res, next) => {
   try {
     const {
@@ -24,7 +20,7 @@ export const createService = async (req, res, next) => {
       price,
       duration,
       category: category || null,
-      image: req.file ? `/uploads/${req.file.filename}` : "",
+      image: req.file ? req.file.path : "", // ✅ Cloudinary URL
       isPopular: isPopular || false,
       pricingType: pricingType || "standard",
       premiumMultiplier: premiumMultiplier || 1.2,
@@ -37,11 +33,7 @@ export const createService = async (req, res, next) => {
   }
 };
 
-/* =========================================================
-   GET ALL SERVICES
-   GET /api/services
-   Public
-========================================================= */
+/* ================= GET ALL SERVICES ================= */
 export const getServices = async (req, res, next) => {
   try {
     const services = await Service.find({ isActive: true })
@@ -54,11 +46,7 @@ export const getServices = async (req, res, next) => {
   }
 };
 
-/* =========================================================
-   GET SINGLE SERVICE
-   GET /api/services/:id
-   Public
-========================================================= */
+/* ================= GET SINGLE SERVICE ================= */
 export const getServiceById = async (req, res, next) => {
   try {
     const service = await Service.findById(req.params.id)
@@ -74,11 +62,7 @@ export const getServiceById = async (req, res, next) => {
   }
 };
 
-/* =========================================================
-   UPDATE SERVICE
-   PUT /api/services/:id
-   Admin
-========================================================= */
+/* ================= UPDATE SERVICE ================= */
 export const updateService = async (req, res, next) => {
   try {
     const service = await Service.findById(req.params.id);
@@ -93,38 +77,32 @@ export const updateService = async (req, res, next) => {
     service.duration = req.body.duration ?? service.duration;
     service.category = req.body.category ?? service.category;
 
-    // ⭐ Popular control
     if (req.body.isPopular !== undefined) {
       service.isPopular = req.body.isPopular;
     }
 
-    // 💎 Pricing type control
     if (req.body.pricingType) {
       service.pricingType = req.body.pricingType;
     }
 
-    // 🔢 Premium multiplier control
     if (req.body.premiumMultiplier !== undefined) {
       service.premiumMultiplier = req.body.premiumMultiplier;
     }
 
+    // ✅ Update image if new file uploaded
     if (req.file) {
-      service.image = `/uploads/${req.file.filename}`;
+      service.image = req.file.path;
     }
 
     const updatedService = await service.save();
-
     res.json(updatedService);
+
   } catch (error) {
     next(error);
   }
 };
 
-/* =========================================================
-   DELETE SERVICE (SOFT DELETE)
-   DELETE /api/services/:id
-   Admin
-========================================================= */
+/* ================= DELETE SERVICE ================= */
 export const deleteService = async (req, res, next) => {
   try {
     const service = await Service.findById(req.params.id);
@@ -137,6 +115,7 @@ export const deleteService = async (req, res, next) => {
     await service.save();
 
     res.json({ message: "Service removed successfully" });
+
   } catch (error) {
     next(error);
   }

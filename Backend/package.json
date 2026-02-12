@@ -1,7 +1,7 @@
 {
-  "name": "backend",
+  "name": "easyappointments-backend",
   "version": "1.0.0",
-  "description": "Hotel Management System Backend",
+  "description": "EasyAppointments Appointment Booking System Backend",
   "type": "module",
   "main": "server.js",
   "scripts": {
@@ -9,18 +9,19 @@
     "dev": "nodemon server.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Hussain",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^3.0.3",
-    "cloudinary": "^2.9.0",
+    "cloudinary": "^1.41.0",
+
     "cors": "^2.8.6",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
-    "express-async-handler": "^1.2.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.1.5",
     "multer": "^2.0.2",
+    "multer-storage-cloudinary": "^4.0.0",
     "nodemailer": "^7.0.13"
   },
   "devDependencies": {
