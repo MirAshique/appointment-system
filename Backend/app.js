@@ -23,7 +23,6 @@ const app = express();
 app.use(
   cors({
     origin: "https://appointment-system-wheat-iota.vercel.app",
-    credentials: true,
   })
 );
 
