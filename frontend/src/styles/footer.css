@@ -1,0 +1,151 @@
+.footer {
+  background: linear-gradient(180deg, #0f172a, #0b1220);
+  color: #cbd5e1;
+  padding: 90px 0 40px 0;
+  margin-top: 120px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle top glow */
+.footer-top-gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, #2563eb, #4f46e5, #2563eb);
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 60px;
+}
+
+/* BRAND */
+.footer-brand h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 20px;
+}
+
+.footer-brand p {
+  line-height: 1.7;
+  font-size: 15px;
+  margin-bottom: 25px;
+  color: #94a3b8;
+}
+
+/* SOCIALS */
+.footer-socials {
+  display: flex;
+  gap: 15px;
+}
+
+.footer-socials span {
+  width: 38px;
+  height: 38px;
+  background: #1e293b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.footer-socials span:hover {
+  background: #2563eb;
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(37,99,235,0.4);
+}
+
+/* LINKS */
+.footer-links h4,
+.footer-contact h4 {
+  color: white;
+  margin-bottom: 18px;
+  font-size: 17px;
+}
+
+.footer-links a {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #94a3b8;
+  text-decoration: none;
+  transition: 0.3s;
+  position: relative;
+}
+
+.footer-links a::after {
+  content: "";
+  width: 0%;
+  height: 2px;
+  background: #2563eb;
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  transition: 0.3s;
+}
+
+.footer-links a:hover {
+  color: white;
+}
+
+.footer-links a:hover::after {
+  width: 100%;
+}
+
+/* CONTACT */
+.footer-contact p {
+  font-size: 14px;
+  margin-bottom: 8px;
+  color: #94a3b8;
+}
+
+/* NEWSLETTER */
+.newsletter {
+  margin-top: 15px;
+  display: flex;
+  gap: 8px;
+}
+
+.newsletter input {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  font-size: 14px;
+}
+
+.newsletter button {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  background: #2563eb;
+  color: white;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.newsletter button:hover {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+}
+
+/* DIVIDER */
+.footer-divider {
+  height: 1px;
+  background: #1e293b;
+  margin: 50px 0 20px 0;
+}
+
+/* BOTTOM */
+.footer-bottom {
+  text-align: center;
+  font-size: 13px;
+  color: #64748b;
+}

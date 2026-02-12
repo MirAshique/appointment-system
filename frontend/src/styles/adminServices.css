@@ -1,0 +1,209 @@
+/* ================= PAGE TITLE ================= */
+
+.admin-services h2 {
+  margin-bottom: 30px;
+  font-size: 26px;
+  font-weight: 700;
+  color: #111827;
+}
+
+/* ================= SERVICE FORM ================= */
+
+.service-form {
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 18px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.05);
+  margin-bottom: 40px;
+
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.service-form input,
+.service-form select {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.service-form input:focus,
+.service-form select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* Submit Button */
+.service-form button {
+  grid-column: 1 / -1;
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.service-form button:hover {
+  transform: translateY(-2px);
+}
+
+/* ================= IMAGE PREVIEW ================= */
+
+.preview-image {
+  width: 140px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-top: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.table-image {
+  width: 80px;
+  height: 55px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+/* ================= FILTER BAR ================= */
+
+.filter-bar {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.filter-bar input,
+.filter-bar select {
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.filter-bar input:focus,
+.filter-bar select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* ================= TABLE ================= */
+
+.services-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.05);
+}
+
+.services-table th,
+.services-table td {
+  padding: 16px 14px;
+  text-align: left;
+}
+
+.services-table th {
+  background: #f8fafc;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #6b7280;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.services-table td {
+  border-bottom: 1px solid #f1f1f1;
+  font-size: 14px;
+  color: #374151;
+}
+
+.services-table tr {
+  transition: all 0.25s ease;
+}
+
+.services-table tr:hover {
+  background: #f3f4f6;
+}
+
+/* ================= POPULAR BADGE BUTTON ================= */
+
+.badge-popular {
+  background: #facc15;
+  color: #78350f;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.badge-popular:hover {
+  transform: scale(1.05);
+}
+
+.badge-default {
+  background: #e5e7eb;
+  color: #374151;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.badge-default:hover {
+  background: #d1d5db;
+}
+
+/* ================= PAGINATION ================= */
+
+.pagination {
+  margin-top: 30px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.pagination button {
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: none;
+  background: #e5e7eb;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.pagination button:hover {
+  background: #d1d5db;
+}
+
+.pagination button.active-page {
+  background: #2563eb;
+  color: white;
+  box-shadow: 0 6px 15px rgba(37, 99, 235, 0.3);
+}
+
+/* ================= EMPTY STATE ================= */
+
+.empty-state {
+  background: white;
+  padding: 50px;
+  border-radius: 18px;
+  text-align: center;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.04);
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
