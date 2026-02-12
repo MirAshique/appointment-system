@@ -22,7 +22,7 @@ const app = express();
 // ================= MIDDLEWARE =================
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "*", // fallback for safety
+    origin: "https://appointment-system-wheat-iota.vercel.app",
     credentials: true,
   })
 );
