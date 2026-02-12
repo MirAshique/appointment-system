@@ -11,8 +11,6 @@ const Services = () => {
   const [sortOption, setSortOption] = useState("default");
   const [pricingMode, setPricingMode] = useState("standard");
 
-  const BASE_URL = "http://localhost:5000";
-
   useEffect(() => {
     fetchServices();
     fetchCategories();
@@ -63,6 +61,19 @@ const Services = () => {
       );
     }
     return service.price;
+  };
+
+  // SMART IMAGE HANDLER (Cloudinary + Old Uploads)
+  const getImageUrl = (image) => {
+    if (!image) return null;
+
+    // If already full URL (Cloudinary)
+    if (image.startsWith("http")) {
+      return image;
+    }
+
+    // If old local upload
+    return `${import.meta.env.VITE_API_URL}${image}`;
   };
 
   return (
@@ -148,9 +159,9 @@ const Services = () => {
                     </div>
                   )}
 
-                  {service.image ? (
+                  {getImageUrl(service.image) ? (
                     <img
-                      src={`${BASE_URL}${service.image}`}
+                      src={getImageUrl(service.image)}
                       alt={service.name}
                       className="service-image"
                     />
