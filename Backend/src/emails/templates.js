@@ -1,29 +1,31 @@
 /* =====================================================
    SHARED EMAIL LAYOUT
 ===================================================== */
-const emailLayout = (title, content, hotel = {}) => `
-  <div style="font-family: Arial, sans-serif; background:#f8fafc; padding:30px">
+
+const emailLayout = (title, content) => `
+  <div style="font-family: Arial, sans-serif; background:#f1f5f9; padding:30px">
     <div style="max-width:600px;margin:auto;background:white;border-radius:8px;overflow:hidden">
       
-      <div style="background:#020617;color:white;padding:20px">
-        <h2 style="margin:0">${hotel.hotelName || "Hotel Management"}</h2>
+      <div style="background:#1e293b;color:white;padding:20px">
+        <h2 style="margin:0">EasyAppointments</h2>
         <p style="margin:4px 0;font-size:13px">
-          ${hotel.address || ""}
+          Smart Appointment Booking System
         </p>
       </div>
 
-      <div style="padding:24px">
+      <div style="padding:24px;color:#334155">
         <h3>${title}</h3>
         ${content}
       </div>
 
-      <div style="background:#f1f5f9;padding:16px;font-size:13px;color:#334155">
-        ${hotel.email ? `<p>Email: ${hotel.email}</p>` : ""}
-        ${hotel.phone ? `<p>Phone: ${hotel.phone}</p>` : ""}
+      <div style="background:#f8fafc;padding:16px;font-size:13px;color:#64748b;text-align:center">
+        © ${new Date().getFullYear()} EasyAppointments. All rights reserved.
       </div>
+
     </div>
   </div>
 `;
+
 
 /* =====================================================
    AUTH EMAILS
@@ -32,9 +34,11 @@ const emailLayout = (title, content, hotel = {}) => `
 export const welcomeEmail = (name) =>
   emailLayout(
     "Welcome 🎉",
-    `<p>Hello <strong>${name}</strong>,</p>
-     <p>Your account has been created successfully.</p>
-     <p>We’re excited to host you!</p>`
+    `
+      <p>Hello <strong>${name}</strong>,</p>
+      <p>Your account has been created successfully.</p>
+      <p>We’re excited to have you onboard!</p>
+    `
   );
 
 export const forgotPasswordEmail = (resetLink) =>
@@ -44,7 +48,7 @@ export const forgotPasswordEmail = (resetLink) =>
       <p>You requested a password reset.</p>
       <p>Click the button below to reset your password:</p>
       <p>
-        <a href="${resetLink}" 
+        <a href="${resetLink}"
            style="display:inline-block;padding:10px 16px;
            background:#2563eb;color:white;border-radius:6px;
            text-decoration:none">
@@ -56,39 +60,42 @@ export const forgotPasswordEmail = (resetLink) =>
   );
 
 /* =====================================================
-   BOOKING EMAILS
+   APPOINTMENT EMAILS
 ===================================================== */
 
-export const bookingCreatedEmail = (room, checkIn, checkOut, hotel) =>
+export const appointmentBookedEmail = (service, date, time) =>
   emailLayout(
-    "Booking Created 🏨",
+    "Appointment Booked 📅",
     `
-      <p>Your booking request has been created.</p>
-      <p><strong>Room:</strong> ${room}</p>
-      <p><strong>Check-in:</strong> ${checkIn}</p>
-      <p><strong>Check-out:</strong> ${checkOut}</p>
-      <p>Status: <strong>Pending confirmation</strong></p>
-    `,
-    hotel
+      <p>Your appointment request has been created.</p>
+      <p><strong>Service:</strong> ${service}</p>
+      <p><strong>Date:</strong> ${date}</p>
+      <p><strong>Time:</strong> ${time}</p>
+      <p>Status: <strong>Pending approval</strong></p>
+    `
   );
 
-export const bookingCancelledEmail = (room, hotel) =>
+
+export const appointmentApprovedEmail = (service, date, time) =>
   emailLayout(
-    "Booking Cancelled ❌",
+    "Appointment Approved ✅",
     `
-      <p>Your booking for <strong>${room}</strong> has been cancelled.</p>
-      ${hotel?.cancellationPolicy ? `<p>${hotel.cancellationPolicy}</p>` : ""}
-    `,
-    hotel
+      <p>Your appointment has been approved.</p>
+      <p><strong>Service:</strong> ${service}</p>
+      <p><strong>Date:</strong> ${date}</p>
+      <p><strong>Time:</strong> ${time}</p>
+      <p>We look forward to serving you!</p>
+    `
   );
 
-/* =====================================================
-   ADMIN EMAIL
-===================================================== */
 
-export const adminNotificationEmail = (message, hotel) =>
+export const appointmentCancelledEmail = (service, date, time) =>
   emailLayout(
-    "Admin Notification",
-    `<p>${message}</p>`,
-    hotel
+    "Appointment Cancelled ❌",
+    `
+      <p>Your appointment has been cancelled.</p>
+      <p><strong>Service:</strong> ${service}</p>
+      <p><strong>Date:</strong> ${date}</p>
+      <p><strong>Time:</strong> ${time}</p>
+    `
   );

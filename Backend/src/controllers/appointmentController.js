@@ -3,6 +3,13 @@ import Service from "../models/Service.js";
 import User from "../models/User.js";
 import sendEmail from "../utils/sendEmail.js";
 
+import {
+  appointmentBookedEmail,
+  appointmentApprovedEmail,
+  appointmentCancelledEmail,
+} from "../emails/templates.js";
+
+
 /* =========================================================
    CREATE APPOINTMENT (User)
 ========================================================= */
@@ -24,7 +31,6 @@ export const createAppointment = async (req, res, next) => {
       });
     }
 
-    // Prevent double booking
     const existingAppointment = await Appointment.findOne({
       service: serviceId,
       date,
@@ -44,26 +50,20 @@ export const createAppointment = async (req, res, next) => {
       date,
       time,
       notes,
-      paymentStatus: "paid", // simulated payment
+      paymentStatus: "paid",
+      status: "pending",
     });
 
-    // Send confirmation email
     try {
       const user = await User.findById(req.user._id);
 
       await sendEmail(
         user.email,
         "Appointment Booking Confirmation",
-        `
-          <h2>Appointment Booked Successfully</h2>
-          <p><strong>Service:</strong> ${service.name}</p>
-          <p><strong>Date:</strong> ${date}</p>
-          <p><strong>Time:</strong> ${time}</p>
-          <p>Status: Pending approval</p>
-        `
+        appointmentBookedEmail(service.name, date, time)
       );
     } catch (emailError) {
-      console.log("Email sending failed:", emailError.message);
+      console.log("Booking email failed:", emailError.message);
     }
 
     res.status(201).json(appointment);
@@ -75,33 +75,17 @@ export const createAppointment = async (req, res, next) => {
 
 
 /* =========================================================
-   GET MY APPOINTMENTS (User) — WITH PAGINATION
+   GET MY APPOINTMENTS (User)
 ========================================================= */
 export const getMyAppointments = async (req, res, next) => {
   try {
-    const page = Number(req.query.page) || 1;
-    const limit = Number(req.query.limit) || 5;
-
-    const skip = (page - 1) * limit;
-
-    const total = await Appointment.countDocuments({
-      user: req.user._id,
-    });
-
     const appointments = await Appointment.find({
       user: req.user._id,
     })
       .populate("service")
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+      .sort({ createdAt: -1 });
 
-    res.json({
-      total,
-      page,
-      pages: Math.ceil(total / limit),
-      appointments,
-    });
+    res.json(appointments);
 
   } catch (error) {
     next(error);
@@ -114,26 +98,12 @@ export const getMyAppointments = async (req, res, next) => {
 ========================================================= */
 export const getAllAppointments = async (req, res, next) => {
   try {
-    const page = Number(req.query.page) || 1;
-    const limit = Number(req.query.limit) || 10;
-
-    const skip = (page - 1) * limit;
-
-    const total = await Appointment.countDocuments();
-
     const appointments = await Appointment.find()
       .populate("user", "name email")
       .populate("service")
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+      .sort({ createdAt: -1 });
 
-    res.json({
-      total,
-      page,
-      pages: Math.ceil(total / limit),
-      appointments,
-    });
+    res.json(appointments);
 
   } catch (error) {
     next(error);
@@ -167,26 +137,36 @@ export const updateAppointmentStatus = async (req, res, next) => {
     appointment.status = status;
     const updatedAppointment = await appointment.save();
 
-    // Send approval email
-    if (status === "approved") {
-      try {
-        const user = await User.findById(appointment.user);
-        const service = await Service.findById(appointment.service);
+    const user = await User.findById(appointment.user);
+    const service = await Service.findById(appointment.service);
 
+    try {
+      if (status === "approved") {
         await sendEmail(
           user.email,
           "Appointment Approved",
-          `
-            <h2>Your Appointment is Approved</h2>
-            <p><strong>Service:</strong> ${service.name}</p>
-            <p><strong>Date:</strong> ${appointment.date}</p>
-            <p><strong>Time:</strong> ${appointment.time}</p>
-            <p>We look forward to seeing you.</p>
-          `
+          appointmentApprovedEmail(
+            service.name,
+            appointment.date,
+            appointment.time
+          )
         );
-      } catch (emailError) {
-        console.log("Approval email failed:", emailError.message);
       }
+
+      if (status === "cancelled") {
+        await sendEmail(
+          user.email,
+          "Appointment Cancelled",
+          appointmentCancelledEmail(
+            service.name,
+            appointment.date,
+            appointment.time
+          )
+        );
+      }
+
+    } catch (emailError) {
+      console.log("Status email failed:", emailError.message);
     }
 
     res.json(updatedAppointment);
@@ -219,6 +199,23 @@ export const cancelAppointment = async (req, res, next) => {
     appointment.status = "cancelled";
     await appointment.save();
 
+    const user = await User.findById(appointment.user);
+    const service = await Service.findById(appointment.service);
+
+    try {
+      await sendEmail(
+        user.email,
+        "Appointment Cancelled",
+        appointmentCancelledEmail(
+          service.name,
+          appointment.date,
+          appointment.time
+        )
+      );
+    } catch (emailError) {
+      console.log("Cancel email failed:", emailError.message);
+    }
+
     res.json({
       message: "Appointment cancelled successfully",
     });
@@ -227,21 +224,18 @@ export const cancelAppointment = async (req, res, next) => {
     next(error);
   }
 };
-
-
 /* =========================================================
-   ADMIN STATISTICS (WITH MONTHLY DATA)
+   ADMIN STATISTICS
 ========================================================= */
 export const getAppointmentStats = async (req, res, next) => {
   try {
     const total = await Appointment.countDocuments();
-
     const pending = await Appointment.countDocuments({ status: "pending" });
     const approved = await Appointment.countDocuments({ status: "approved" });
     const completed = await Appointment.countDocuments({ status: "completed" });
     const cancelled = await Appointment.countDocuments({ status: "cancelled" });
 
-    // 🔥 Monthly Bookings
+    // Monthly bookings
     const monthlyBookings = await Appointment.aggregate([
       {
         $group: {
@@ -252,7 +246,7 @@ export const getAppointmentStats = async (req, res, next) => {
       { $sort: { "_id": 1 } },
     ]);
 
-    // 🔥 Monthly Revenue (approved + completed only)
+    // Monthly revenue (approved + completed)
     const monthlyRevenue = await Appointment.aggregate([
       {
         $match: {
@@ -277,39 +271,6 @@ export const getAppointmentStats = async (req, res, next) => {
       { $sort: { "_id": 1 } },
     ]);
 
-    // 🔥 Revenue By Category
-    const revenueByCategory = await Appointment.aggregate([
-      {
-        $match: {
-          status: { $in: ["approved", "completed"] },
-        },
-      },
-      {
-        $lookup: {
-          from: "services",
-          localField: "service",
-          foreignField: "_id",
-          as: "serviceData",
-        },
-      },
-      { $unwind: "$serviceData" },
-      {
-        $lookup: {
-          from: "categories",
-          localField: "serviceData.category",
-          foreignField: "_id",
-          as: "categoryData",
-        },
-      },
-      { $unwind: "$categoryData" },
-      {
-        $group: {
-          _id: "$categoryData.name",
-          revenue: { $sum: "$serviceData.price" },
-        },
-      },
-    ]);
-
     res.json({
       total,
       pending,
@@ -318,8 +279,8 @@ export const getAppointmentStats = async (req, res, next) => {
       cancelled,
       monthlyBookings,
       monthlyRevenue,
-      revenueByCategory,
     });
+
   } catch (error) {
     next(error);
   }
