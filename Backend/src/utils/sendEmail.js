@@ -2,6 +2,11 @@ import SibApiV3Sdk from "sib-api-v3-sdk";
 
 const sendEmail = async ({ to, subject, html }) => {
   try {
+    if (!to) {
+      console.log("❌ No recipient email provided");
+      return;
+    }
+
     const client = SibApiV3Sdk.ApiClient.instance;
 
     const apiKey = client.authentications["api-key"];
@@ -11,7 +16,7 @@ const sendEmail = async ({ to, subject, html }) => {
 
     const sender = {
       name: "EasyAppointments",
-      email: "ashiqtalpur18@gmail.com", // ✅ VERIFIED SENDER
+      email: "ashiqtalpur18@gmail.com", // ✅ MUST be verified in Brevo
     };
 
     const receivers = [

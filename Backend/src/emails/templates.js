@@ -26,7 +26,6 @@ const emailLayout = (title, content) => `
   </div>
 `;
 
-
 /* =====================================================
    AUTH EMAILS
 ===================================================== */
@@ -75,7 +74,6 @@ export const appointmentBookedEmail = (service, date, time) =>
     `
   );
 
-
 export const appointmentApprovedEmail = (service, date, time) =>
   emailLayout(
     "Appointment Approved ✅",
@@ -87,7 +85,6 @@ export const appointmentApprovedEmail = (service, date, time) =>
       <p>We look forward to serving you!</p>
     `
   );
-
 
 export const appointmentCancelledEmail = (service, date, time) =>
   emailLayout(

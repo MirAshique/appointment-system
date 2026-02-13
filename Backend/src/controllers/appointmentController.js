@@ -9,9 +9,8 @@ import {
   appointmentCancelledEmail,
 } from "../emails/templates.js";
 
-
 /* =========================================================
-   CREATE APPOINTMENT (User)
+   CREATE APPOINTMENT
 ========================================================= */
 export const createAppointment = async (req, res, next) => {
   try {
@@ -54,17 +53,13 @@ export const createAppointment = async (req, res, next) => {
       status: "pending",
     });
 
-    try {
-      const user = await User.findById(req.user._id);
+    const user = await User.findById(req.user._id);
 
-      await sendEmail(
-        user.email,
-        "Appointment Booking Confirmation",
-        appointmentBookedEmail(service.name, date, time)
-      );
-    } catch (emailError) {
-      console.log("Booking email failed:", emailError.message);
-    }
+    await sendEmail({
+      to: user.email,
+      subject: "Appointment Booking Confirmation",
+      html: appointmentBookedEmail(service.name, date, time),
+    });
 
     res.status(201).json(appointment);
 
@@ -73,44 +68,6 @@ export const createAppointment = async (req, res, next) => {
   }
 };
 
-
-/* =========================================================
-   GET MY APPOINTMENTS (User)
-========================================================= */
-export const getMyAppointments = async (req, res, next) => {
-  try {
-    const appointments = await Appointment.find({
-      user: req.user._id,
-    })
-      .populate("service")
-      .sort({ createdAt: -1 });
-
-    res.json(appointments);
-
-  } catch (error) {
-    next(error);
-  }
-};
-
-
-/* =========================================================
-   GET ALL APPOINTMENTS (Admin)
-========================================================= */
-export const getAllAppointments = async (req, res, next) => {
-  try {
-    const appointments = await Appointment.find()
-      .populate("user", "name email")
-      .populate("service")
-      .sort({ createdAt: -1 });
-
-    res.json(appointments);
-
-  } catch (error) {
-    next(error);
-  }
-};
-
-
 /* =========================================================
    UPDATE APPOINTMENT STATUS (Admin)
 ========================================================= */
@@ -118,64 +75,47 @@ export const updateAppointmentStatus = async (req, res, next) => {
   try {
     const { status } = req.body;
 
-    const validStatuses = ["pending", "approved", "cancelled", "completed"];
-
-    if (!validStatuses.includes(status)) {
-      return res.status(400).json({
-        message: "Invalid status value",
-      });
-    }
-
     const appointment = await Appointment.findById(req.params.id);
-
     if (!appointment) {
-      return res.status(404).json({
-        message: "Appointment not found",
-      });
+      return res.status(404).json({ message: "Appointment not found" });
     }
 
     appointment.status = status;
-    const updatedAppointment = await appointment.save();
+    await appointment.save();
 
     const user = await User.findById(appointment.user);
     const service = await Service.findById(appointment.service);
 
-    try {
-      if (status === "approved") {
-        await sendEmail(
-          user.email,
-          "Appointment Approved",
-          appointmentApprovedEmail(
-            service.name,
-            appointment.date,
-            appointment.time
-          )
-        );
-      }
-
-      if (status === "cancelled") {
-        await sendEmail(
-          user.email,
-          "Appointment Cancelled",
-          appointmentCancelledEmail(
-            service.name,
-            appointment.date,
-            appointment.time
-          )
-        );
-      }
-
-    } catch (emailError) {
-      console.log("Status email failed:", emailError.message);
+    if (status === "approved") {
+      await sendEmail({
+        to: user.email,
+        subject: "Appointment Approved",
+        html: appointmentApprovedEmail(
+          service.name,
+          appointment.date,
+          appointment.time
+        ),
+      });
     }
 
-    res.json(updatedAppointment);
+    if (status === "cancelled") {
+      await sendEmail({
+        to: user.email,
+        subject: "Appointment Cancelled",
+        html: appointmentCancelledEmail(
+          service.name,
+          appointment.date,
+          appointment.time
+        ),
+      });
+    }
+
+    res.json(appointment);
 
   } catch (error) {
     next(error);
   }
 };
-
 
 /* =========================================================
    CANCEL APPOINTMENT (User)
@@ -183,17 +123,8 @@ export const updateAppointmentStatus = async (req, res, next) => {
 export const cancelAppointment = async (req, res, next) => {
   try {
     const appointment = await Appointment.findById(req.params.id);
-
     if (!appointment) {
-      return res.status(404).json({
-        message: "Appointment not found",
-      });
-    }
-
-    if (appointment.user.toString() !== req.user._id.toString()) {
-      return res.status(403).json({
-        message: "Not authorized",
-      });
+      return res.status(404).json({ message: "Appointment not found" });
     }
 
     appointment.status = "cancelled";
@@ -202,84 +133,17 @@ export const cancelAppointment = async (req, res, next) => {
     const user = await User.findById(appointment.user);
     const service = await Service.findById(appointment.service);
 
-    try {
-      await sendEmail(
-        user.email,
-        "Appointment Cancelled",
-        appointmentCancelledEmail(
-          service.name,
-          appointment.date,
-          appointment.time
-        )
-      );
-    } catch (emailError) {
-      console.log("Cancel email failed:", emailError.message);
-    }
-
-    res.json({
-      message: "Appointment cancelled successfully",
+    await sendEmail({
+      to: user.email,
+      subject: "Appointment Cancelled",
+      html: appointmentCancelledEmail(
+        service.name,
+        appointment.date,
+        appointment.time
+      ),
     });
 
-  } catch (error) {
-    next(error);
-  }
-};
-/* =========================================================
-   ADMIN STATISTICS
-========================================================= */
-export const getAppointmentStats = async (req, res, next) => {
-  try {
-    const total = await Appointment.countDocuments();
-    const pending = await Appointment.countDocuments({ status: "pending" });
-    const approved = await Appointment.countDocuments({ status: "approved" });
-    const completed = await Appointment.countDocuments({ status: "completed" });
-    const cancelled = await Appointment.countDocuments({ status: "cancelled" });
-
-    // Monthly bookings
-    const monthlyBookings = await Appointment.aggregate([
-      {
-        $group: {
-          _id: { $month: "$createdAt" },
-          bookings: { $sum: 1 },
-        },
-      },
-      { $sort: { "_id": 1 } },
-    ]);
-
-    // Monthly revenue (approved + completed)
-    const monthlyRevenue = await Appointment.aggregate([
-      {
-        $match: {
-          status: { $in: ["approved", "completed"] },
-        },
-      },
-      {
-        $lookup: {
-          from: "services",
-          localField: "service",
-          foreignField: "_id",
-          as: "serviceData",
-        },
-      },
-      { $unwind: "$serviceData" },
-      {
-        $group: {
-          _id: { $month: "$createdAt" },
-          revenue: { $sum: "$serviceData.price" },
-        },
-      },
-      { $sort: { "_id": 1 } },
-    ]);
-
-    res.json({
-      total,
-      pending,
-      approved,
-      completed,
-      cancelled,
-      monthlyBookings,
-      monthlyRevenue,
-    });
+    res.json({ message: "Appointment cancelled successfully" });
 
   } catch (error) {
     next(error);
