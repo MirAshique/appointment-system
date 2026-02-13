@@ -1,40 +1,38 @@
-import nodemailer from "nodemailer";
+import SibApiV3Sdk from "sib-api-v3-sdk";
 
 const sendEmail = async ({ to, subject, html }) => {
   try {
-    // 🔎 Debug: check if env variables are loaded
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-      console.log("❌ EMAIL_USER or EMAIL_PASS is missing in environment variables");
-      return;
-    }
+    const client = SibApiV3Sdk.ApiClient.instance;
 
-    console.log("📧 Sending email to:", to);
-    console.log("🔐 Using SMTP user:", process.env.EMAIL_USER);
+    const apiKey = client.authentications["api-key"];
+    apiKey.apiKey = process.env.BREVO_API_KEY;
 
-    const transporter = nodemailer.createTransport({
-      host: "smtp-relay.brevo.com",
-      port: 587,
-      secure: false, // TLS
-      auth: {
-        user: process.env.EMAIL_USER, // Brevo SMTP login
-        pass: process.env.EMAIL_PASS, // Brevo SMTP key
+    const tranEmailApi = new SibApiV3Sdk.TransactionalEmailsApi();
+
+    const sender = {
+      name: "EasyAppointments",
+      email: "ashiqtalpur18@gmail.com", // ✅ VERIFIED SENDER
+    };
+
+    const receivers = [
+      {
+        email: to,
       },
-      tls: {
-        rejectUnauthorized: false,
-      },
-    });
+    ];
 
-    const info = await transporter.sendMail({
-      from: `"EasyAppointments" <${process.env.EMAIL_USER}>`,
-      to,
+    await tranEmailApi.sendTransacEmail({
+      sender,
+      to: receivers,
       subject,
-      html,
+      htmlContent: html,
     });
 
-    console.log("✅ Email sent successfully:", info.response);
-
+    console.log("✅ Email sent successfully via Brevo API");
   } catch (error) {
-    console.log("❌ Email sending error:", error.message);
+    console.log(
+      "❌ Email sending error:",
+      error.response?.body || error.message
+    );
   }
 };
 
