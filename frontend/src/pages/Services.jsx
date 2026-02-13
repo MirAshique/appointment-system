@@ -63,7 +63,7 @@ const Services = () => {
     return service.price;
   };
 
-  // SMART IMAGE HANDLER (Cloudinary + Old Uploads)
+  // SMART IMAGE HANDLER (Cloudinary + Old Uploads Support)
   const getImageUrl = (image) => {
     if (!image) return null;
 
@@ -72,7 +72,7 @@ const Services = () => {
       return image;
     }
 
-    // If old local upload
+    // If old local upload (for backward compatibility)
     return `${import.meta.env.VITE_API_URL}${image}`;
   };
 
