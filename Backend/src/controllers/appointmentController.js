@@ -10,7 +10,7 @@ import {
 } from "../emails/templates.js";
 
 /* =========================================================
-   CREATE APPOINTMENT
+   CREATE APPOINTMENT (User)
 ========================================================= */
 export const createAppointment = async (req, res, next) => {
   try {
@@ -53,16 +53,54 @@ export const createAppointment = async (req, res, next) => {
       status: "pending",
     });
 
-    const user = await User.findById(req.user._id);
+    try {
+      const user = await User.findById(req.user._id);
 
-    await sendEmail({
-      to: user.email,
-      subject: "Appointment Booking Confirmation",
-      html: appointmentBookedEmail(service.name, date, time),
-    });
+      if (user?.email) {
+        await sendEmail({
+          to: user.email,
+          subject: "Appointment Booking Confirmation",
+          html: appointmentBookedEmail(service.name, date, time),
+        });
+      }
+    } catch (emailError) {
+      console.log("Booking email failed:", emailError.message);
+    }
 
     res.status(201).json(appointment);
+  } catch (error) {
+    next(error);
+  }
+};
 
+/* =========================================================
+   GET MY APPOINTMENTS (User)
+========================================================= */
+export const getMyAppointments = async (req, res, next) => {
+  try {
+    const appointments = await Appointment.find({
+      user: req.user._id,
+    })
+      .populate("service")
+      .sort({ createdAt: -1 });
+
+    res.json(appointments);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/* =========================================================
+   GET ALL APPOINTMENTS (Admin)
+========================================================= */
+export const getAllAppointments = async (req, res, next) => {
+  try {
+    const appointments = await Appointment.find()
+      .populate("user", "name email")
+      .populate("service")
+      .sort({ createdAt: -1 });
+
+    res.json(appointments);
   } catch (error) {
     next(error);
   }
@@ -75,43 +113,59 @@ export const updateAppointmentStatus = async (req, res, next) => {
   try {
     const { status } = req.body;
 
+    const validStatuses = ["pending", "approved", "cancelled", "completed"];
+
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
+        message: "Invalid status value",
+      });
+    }
+
     const appointment = await Appointment.findById(req.params.id);
+
     if (!appointment) {
-      return res.status(404).json({ message: "Appointment not found" });
+      return res.status(404).json({
+        message: "Appointment not found",
+      });
     }
 
     appointment.status = status;
-    await appointment.save();
+    const updatedAppointment = await appointment.save();
 
     const user = await User.findById(appointment.user);
     const service = await Service.findById(appointment.service);
 
-    if (status === "approved") {
-      await sendEmail({
-        to: user.email,
-        subject: "Appointment Approved",
-        html: appointmentApprovedEmail(
-          service.name,
-          appointment.date,
-          appointment.time
-        ),
-      });
+    try {
+      if (user?.email) {
+        if (status === "approved") {
+          await sendEmail({
+            to: user.email,
+            subject: "Appointment Approved",
+            html: appointmentApprovedEmail(
+              service.name,
+              appointment.date,
+              appointment.time
+            ),
+          });
+        }
+
+        if (status === "cancelled") {
+          await sendEmail({
+            to: user.email,
+            subject: "Appointment Cancelled",
+            html: appointmentCancelledEmail(
+              service.name,
+              appointment.date,
+              appointment.time
+            ),
+          });
+        }
+      }
+    } catch (emailError) {
+      console.log("Status email failed:", emailError.message);
     }
 
-    if (status === "cancelled") {
-      await sendEmail({
-        to: user.email,
-        subject: "Appointment Cancelled",
-        html: appointmentCancelledEmail(
-          service.name,
-          appointment.date,
-          appointment.time
-        ),
-      });
-    }
-
-    res.json(appointment);
-
+    res.json(updatedAppointment);
   } catch (error) {
     next(error);
   }
@@ -123,8 +177,17 @@ export const updateAppointmentStatus = async (req, res, next) => {
 export const cancelAppointment = async (req, res, next) => {
   try {
     const appointment = await Appointment.findById(req.params.id);
+
     if (!appointment) {
-      return res.status(404).json({ message: "Appointment not found" });
+      return res.status(404).json({
+        message: "Appointment not found",
+      });
+    }
+
+    if (appointment.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        message: "Not authorized",
+      });
     }
 
     appointment.status = "cancelled";
@@ -133,18 +196,48 @@ export const cancelAppointment = async (req, res, next) => {
     const user = await User.findById(appointment.user);
     const service = await Service.findById(appointment.service);
 
-    await sendEmail({
-      to: user.email,
-      subject: "Appointment Cancelled",
-      html: appointmentCancelledEmail(
-        service.name,
-        appointment.date,
-        appointment.time
-      ),
+    try {
+      if (user?.email) {
+        await sendEmail({
+          to: user.email,
+          subject: "Appointment Cancelled",
+          html: appointmentCancelledEmail(
+            service.name,
+            appointment.date,
+            appointment.time
+          ),
+        });
+      }
+    } catch (emailError) {
+      console.log("Cancel email failed:", emailError.message);
+    }
+
+    res.json({
+      message: "Appointment cancelled successfully",
     });
+  } catch (error) {
+    next(error);
+  }
+};
 
-    res.json({ message: "Appointment cancelled successfully" });
+/* =========================================================
+   ADMIN STATISTICS
+========================================================= */
+export const getAppointmentStats = async (req, res, next) => {
+  try {
+    const total = await Appointment.countDocuments();
+    const pending = await Appointment.countDocuments({ status: "pending" });
+    const approved = await Appointment.countDocuments({ status: "approved" });
+    const completed = await Appointment.countDocuments({ status: "completed" });
+    const cancelled = await Appointment.countDocuments({ status: "cancelled" });
 
+    res.json({
+      total,
+      pending,
+      approved,
+      completed,
+      cancelled,
+    });
   } catch (error) {
     next(error);
   }
