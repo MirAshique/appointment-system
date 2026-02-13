@@ -7,20 +7,21 @@
 
 body {
   background-color: #f4f6f9;
+  overflow-x: hidden;
 }
 
 .container {
   width: 90%;
   max-width: 1200px;
   margin: auto;
-  padding: 20px 0;
+  padding: 40px 0;
 }
 
 .btn {
   padding: 10px 16px;
   border: none;
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: 12px;
   font-size: 14px;
 }
 
@@ -37,7 +38,7 @@ body {
 .card {
   background: white;
   padding: 20px;
-  border-radius: 8px;
+  border-radius: 16px;
   box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
 }
 
@@ -52,7 +53,13 @@ body {
 .approved { background: green; }
 .completed { background: blue; }
 .cancelled { background: red; }
-button,
-.btn {
-  border-radius: 12px !important;
+
+/* Responsive Typography */
+@media (max-width: 768px) {
+  h1 { font-size: 28px !important; }
+  h2 { font-size: 24px !important; }
+  h3 { font-size: 20px !important; }
+  .container {
+    padding: 20px 0;
+  }
 }

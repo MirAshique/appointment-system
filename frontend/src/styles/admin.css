@@ -148,3 +148,25 @@
   padding: 12px 10px;
   border-top: 1px solid #f3f4f6;
 }
+/* MOBILE TABLE FIX */
+@media (max-width: 768px) {
+
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .recent-section {
+    padding: 15px;
+  }
+
+  .dashboard-header h2 {
+    font-size: 22px;
+  }
+
+}

@@ -1,13 +1,14 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useState } from "react";
 import "../styles/navbar.css";
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  // Hide navbar only on admin routes
   if (location.pathname.startsWith("/admin")) {
     return null;
   }
@@ -24,14 +25,27 @@ const Navbar = () => {
           <Link to="/">EasyAppointments</Link>
         </h2>
 
-        <div className="nav-links">
+        <div 
+          className={`hamburger ${menuOpen ? "active" : ""}`}
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+
+        <div className={`nav-links ${menuOpen ? "open" : ""}`}>
 
           {!user && (
             <>
-              <Link to="/">Home</Link>
-              <Link to="/services">Services</Link>
-              <Link to="/login">Login</Link>
-              <Link to="/register" className="btn btn-primary">
+              <Link to="/" onClick={() => setMenuOpen(false)}>Home</Link>
+              <Link to="/services" onClick={() => setMenuOpen(false)}>Services</Link>
+              <Link to="/login" onClick={() => setMenuOpen(false)}>Login</Link>
+              <Link 
+                to="/register" 
+                className="btn btn-primary"
+                onClick={() => setMenuOpen(false)}
+              >
                 Register
               </Link>
             </>
@@ -39,9 +53,11 @@ const Navbar = () => {
 
           {user && user.role === "customer" && (
             <>
-              <Link to="/">Home</Link>
-              <Link to="/services">Services</Link>
-              <Link to="/my-appointments">My Appointments</Link>
+              <Link to="/" onClick={() => setMenuOpen(false)}>Home</Link>
+              <Link to="/services" onClick={() => setMenuOpen(false)}>Services</Link>
+              <Link to="/my-appointments" onClick={() => setMenuOpen(false)}>
+                My Appointments
+              </Link>
               <button onClick={handleLogout} className="btn btn-danger">
                 Logout
               </button>

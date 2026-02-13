@@ -149,3 +149,26 @@
   font-size: 13px;
   color: #64748b;
 }
+.footer-content {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 30px;
+}
+
+@media (max-width: 992px) {
+  .footer-content {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .footer-content {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .newsletter {
+    flex-direction: column;
+    gap: 10px;
+  }
+}

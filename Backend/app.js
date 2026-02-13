@@ -23,7 +23,8 @@ const app = express();
 app.use(
   cors({
     origin: [
-      "https://appointment-system-wheat-iota.vercel.app",
+      "http://localhost:5173", // Local dev (Vite)
+      "https://appointment-system-wheat-iota.vercel.app", // Vercel frontend
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: false,
@@ -31,8 +32,6 @@ app.use(
 );
 
 app.use(express.json());
-
-// ================= STATIC FILES =================
 
 // ================= ROUTES =================
 app.use("/api/auth", authRoutes);

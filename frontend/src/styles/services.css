@@ -200,3 +200,28 @@
   transform: translateY(-3px);
   box-shadow: 0 12px 25px rgba(37,99,235,0.3);
 }
+/* MOBILE FIX */
+@media (max-width: 768px) {
+
+  .services-section {
+    padding: 80px 0;
+  }
+
+  .services-grid {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+
+  .services-controls {
+    gap: 15px;
+  }
+
+  .category-filter {
+    gap: 8px;
+  }
+
+  .service-card {
+    padding: 20px;
+  }
+
+}
